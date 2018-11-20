@@ -5,9 +5,12 @@ import fr.utbm.japanesecharacterrecognition.math.VectorDouble;
 import fr.utbm.japanesecharacterrecognition.util.RectangleExtraction;
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
+
+import org.opencv.core.Rect;
 import org.opencv.imgcodecs.Imgcodecs;
 
 import static org.opencv.imgcodecs.Imgcodecs.CV_LOAD_IMAGE_GRAYSCALE;
+
 
 
 public class Density implements Feature {
@@ -43,34 +46,41 @@ public class Density implements Feature {
 
     public void setImage(String imagePath){
         //Set the image
-        image = RectangleExtraction.extractRectangle(Imgcodecs.imread(imagePath,CV_LOAD_IMAGE_GRAYSCALE));
-        calculFeature();
+        image = Imgcodecs.imread(imagePath,CV_LOAD_IMAGE_GRAYSCALE);
+        Rect boundingRectangle = RectangleExtraction.extractRectangle(image);
+        image = image.submat(boundingRectangle);
+
+        calculFeature(imagePath);
 
     }
 
 
-    private void calculFeature(){
+    private void calculFeature(String imgPath){
         //Create the step for defining the zone of interest.
-        Double verticalStep =  image.rows() / numberOfLine;
-        Double horizontalStep =  image.cols() / numberOfColumn;
+        Double height = image.size().height;
+        Double width = image.size().width;
+        Double verticalStep =  (height-1) / numberOfLine;
+        Double horizontalStep =  (width-1) / numberOfColumn;
+
         int positionInVector = 0;
 
-        for (Double row = 0.0; row < image.rows(); row+=verticalStep){
-            int baseRow = (int) Math.ceil(row);
-            int endRow = (int) Math.ceil(row+verticalStep);
+        //Line
+        for(Double currentY = 0.0; currentY+verticalStep < height; currentY+=verticalStep){
+            int lowerBoundY = (int) Math.ceil(currentY);
+            int upperBoundY = (int) Math.ceil(currentY+verticalStep);
 
-            for (Double column = 0.0; column < image.cols(); column+=horizontalStep){
-                int baseColumn = (int) Math.ceil(column);
-                int endColumn = (int) Math.ceil(column+horizontalStep);
+            //Column
+            for(Double currentX = 0.0; currentX+horizontalStep < width; currentX+=horizontalStep){
+                int lowerBoundX = (int) Math.ceil(currentX);
+                int upperBoundX = (int) Math.ceil(currentX+horizontalStep);
 
-                Mat subImage =  image.submat(baseRow, endRow, baseColumn,endColumn);
-                Double nbOfBlackPixel =  (double) ((endRow-baseRow) * (endColumn-baseColumn)) - Core.countNonZero(subImage);
-                densityVector.getVector().add(positionInVector, nbOfBlackPixel / ((endRow-baseRow) * (endColumn-baseColumn)));
+                Mat subImg = image.submat(lowerBoundY,upperBoundY,lowerBoundX,upperBoundX);
+                Double nbOfBlackPixel = (double) ((upperBoundX-lowerBoundX)*(upperBoundY-lowerBoundY)) - Core.countNonZero(subImg);
+                densityVector.getVector().add(positionInVector, nbOfBlackPixel / ((upperBoundX-lowerBoundX)*(upperBoundY-lowerBoundY)));
 
                 positionInVector++;
-
-
             }
         }
+
     }
 }

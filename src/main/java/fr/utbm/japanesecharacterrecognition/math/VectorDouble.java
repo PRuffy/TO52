@@ -11,12 +11,17 @@ public class VectorDouble{
     }
 
     public Double computeEuclideanSubstraction(VectorDouble vectorDouble){
-        VectorDouble result = new VectorDouble(this.vector.capacity());
-        for(int i = 0; i < this.vector.size();i++){
-            result.getVector().add(i,this.vector.get(i)-vectorDouble.getVector().get(i));
+        try{
+            VectorDouble result = new VectorDouble(this.vector.capacity());
+            for(int i = 0; i < this.vector.size();i++){
+                result.getVector().add(i,this.vector.get(i)-vectorDouble.getVector().get(i));
+            }
+
+            return result.calculateEuclideanNorm();
+        }catch(ArrayIndexOutOfBoundsException e){
+            return Double.MAX_VALUE;
         }
 
-        return result.calculateEuclideanNorm();
     }
 
     public Double calculateEuclideanNorm(){
