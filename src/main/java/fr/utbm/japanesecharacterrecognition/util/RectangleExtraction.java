@@ -52,8 +52,6 @@ public class RectangleExtraction {
         }
 
 
-        Rect rect = new Rect(x,y,width,height);
-
-        return rect;
+        return new Rect(x,y,width,height);
     }
 }

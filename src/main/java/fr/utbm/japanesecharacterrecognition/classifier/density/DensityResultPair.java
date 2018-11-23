@@ -1,4 +1,4 @@
-package fr.utbm.japanesecharacterrecognition.comparator.density;
+package fr.utbm.japanesecharacterrecognition.classifier.density;
 
 public class DensityResultPair {
     private String Categorie;
